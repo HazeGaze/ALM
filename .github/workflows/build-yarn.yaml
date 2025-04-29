@@ -1,0 +1,66 @@
+name: Build-Yarn
+
+on:
+  workflow_call:
+    inputs:
+      app-folder:
+        description: "The folder containing the app to deploy"
+        required: true
+        type: string
+      dist-folder:
+        description: "The folder containing the app to deploy"
+        type: string
+        default: "dist"
+      netlify-site-id:
+        description: "The Netlify site ID"
+        required: true
+        type: string
+      artifact-name:
+        description: "The folder containing the app to deploy"
+        type: string
+        default: "web-app"
+
+    secrets:
+      netlify-auth-token:
+        description: "Netlify authentication token"
+        required: true
+
+jobs:
+  build_app:
+    name: Build app with version number
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+
+      - name: Install Yarn
+        run: corepack enable |
+          corepack prepare yarn@stable --activate
+
+      # Yarn dependencies cannot be cached until yarn is installed
+      # WORKAROUND: https://github.com/actions/setup-node/issues/531
+      - name: Install node
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          cache: yarn
+          cache-dependency-path: ${{ inputs.app-folder }}/yarn.lock
+
+      - name: Install dependencies
+        working-directory: ${{ inputs.app-folder }}
+        run: yarn install --immutable
+
+      - name: Build web-app
+        working-directory: ${{ inputs.app-folder }}
+        run: yarn build
+
+      - name: Upload web-app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.app-folder }}/${{ inputs.dist-folder }}
+          retention-days: 7

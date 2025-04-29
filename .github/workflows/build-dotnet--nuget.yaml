@@ -1,0 +1,40 @@
+name: Build-Yarn
+
+on:
+  workflow_call:
+    inputs:
+      app-folder:
+        description: "The folder containing the app to deploy"
+        required: true
+        type: string
+      artifact-name:
+        description: "The folder containing the app to deploy"
+        type: string
+        default: "nuget-package"
+
+jobs:
+  build_app:
+    name: Build dotnet project as NuGet package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup dotnet '8.0.x'
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Restore dependencies
+        working-directory: ${{ inputs.app-folder }}
+        run: dotnet restore
+
+      - name: Pack the project
+        working-directory: ${{ inputs.app-folder }}
+        run: dotnet pack -c Release
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.app-folder }}/bin/Release/*.nupkg
+          retention-days: 7

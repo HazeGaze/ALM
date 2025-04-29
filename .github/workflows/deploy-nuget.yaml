@@ -1,0 +1,38 @@
+name: Build-Yarn
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        description: "The name of the artifact to download"
+        required: true
+        type: string
+      nuget-feed:
+        description: "The NuGet feed URL"
+        type: string
+        source: "https://nuget.pkg.github.com/NiewView/index.json"
+      username:
+        description: "The username for the NuGet feed"
+        type: string
+        default: "NiewView"
+
+    secrets:
+      github-token:
+        description: "Github token"
+        required: true
+
+jobs:
+  publish:
+    name: Publish to GitHub Packages
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: dist
+      - name: Publish to GitHub Packages
+        run: |
+          dotnet nuget add source --username ${{ inputs.username }} --password ${{ secrets.github-token }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/NiewView/index.json"
+          dotnet nuget push "dist/*.nupkg" --source github

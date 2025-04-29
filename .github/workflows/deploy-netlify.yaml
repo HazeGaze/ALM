@@ -1,0 +1,49 @@
+name: Build-Yarn
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        description: "The name of the artifact to download"
+        required: true
+        type: string
+      netlify-site-id:
+        description: "The Netlify site ID"
+        required: true
+        type: string
+
+    secrets:
+      netlify-auth-token:
+        description: "Netlify authentication token"
+        required: true
+
+jobs:
+  deploy_app:
+    name: Deploy app to Netlify
+    needs: build_app
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download web-app artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: dist
+      - name: Deploy to Netlify
+        uses: South-Paw/action-netlify-cli@v2
+        id: netlify
+        with:
+          # note that the --json flag has been passed so we can parse outputs
+          args: deploy --json --prod --dir "./dist" --message "Deploy from GitHub Actions [${{ github.sha }}]"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-auth-token }}
+          NETLIFY_SITE_ID: ${{ inputs.netlify-site-id }}
+      - name: Parse NETLIFY_OUTPUT JSON
+        run: |
+          echo "The URL where the logs from the deploy can be found"
+          echo "${{ fromJson(steps.netlify.outputs.NETLIFY_OUTPUT).logs }}"
+          echo ""
+          echo "the URL of the draft site that Netlify provides"
+          echo "${{ fromJson(steps.netlify.outputs.NETLIFY_OUTPUT).deploy_url }}"
+          echo ""
+          echo "the URL of the "real" site, set only if `--prod` was passed"
+          echo "${{ fromJson(steps.netlify.outputs.NETLIFY_OUTPUT).url }}"
