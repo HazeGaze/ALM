@@ -1,4 +1,4 @@
-name: Build-Yarn
+name: Deploy-NuGet
 
 on:
   workflow_call:

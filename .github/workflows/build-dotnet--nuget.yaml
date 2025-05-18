@@ -1,4 +1,4 @@
-name: Build-Yarn
+name: Build-Dotnet NuGet
 
 on:
   workflow_call:
