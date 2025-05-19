@@ -20,7 +20,6 @@ on:
 jobs:
   deploy_app:
     name: Deploy app to Netlify
-    needs: build_app
     runs-on: ubuntu-latest
     steps:
       - name: Download web-app artifact
