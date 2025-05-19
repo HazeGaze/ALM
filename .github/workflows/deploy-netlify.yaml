@@ -3,24 +3,20 @@ name: Deploy-Netlify
 on:
   workflow_call:
     inputs:
+      environment:
+        type: string
+        description: github environment to deploy to
+        required: true
       artifact-name:
         description: "The name of the artifact to download"
         required: true
         type: string
-      netlify-site-id:
-        description: "The Netlify site ID"
-        required: true
-        type: string
-
-    secrets:
-      netlify-auth-token:
-        description: "Netlify authentication token"
-        required: true
 
 jobs:
   deploy_app:
     name: Deploy app to Netlify
     runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
     steps:
       - name: Download web-app artifact
         uses: actions/download-artifact@v4
@@ -34,8 +30,8 @@ jobs:
           # note that the --json flag has been passed so we can parse outputs
           args: deploy --json --prod --dir "./dist" --message "Deploy from GitHub Actions [${{ github.sha }}]"
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.netlify-auth-token }}
-          NETLIFY_SITE_ID: ${{ inputs.netlify-site-id }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PAT }}
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_PROJECTID }}
       - name: Parse NETLIFY_OUTPUT JSON
         run: |
           echo "The URL where the logs from the deploy can be found"
