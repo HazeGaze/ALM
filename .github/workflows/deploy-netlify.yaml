@@ -25,7 +25,7 @@ jobs:
           path: dist
       - name: echo environment
         run: |
-          echo "Deploying to environment: ${{ inputs.environment }} 
+          echo "Deploying to environment: ${{ inputs.environment }}"
           echo "Deploying to artifact: ${{ vars.NETLIFY_PROJECTID }}"
       - name: Deploy to Netlify
         uses: South-Paw/action-netlify-cli@v2
