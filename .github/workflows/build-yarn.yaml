@@ -11,19 +11,10 @@ on:
         description: "The folder containing the app to deploy"
         type: string
         default: "dist"
-      netlify-site-id:
-        description: "The Netlify site ID"
-        required: true
-        type: string
       artifact-name:
         description: "The folder containing the app to deploy"
         type: string
         default: "web-app"
-
-    secrets:
-      netlify-auth-token:
-        description: "Netlify authentication token"
-        required: true
 
 jobs:
   build_app:
