@@ -1,0 +1,51 @@
+name: Deploy-Vercel
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        type: string
+        description: github environment to deploy to
+        required: true
+      artifact-name-files:
+        description: "The name of the artifact, which contains the static files to deploy"
+        required: true
+        type: string
+      artifact-name-function:
+        description: "The name of the artifact, which contains the serverless functions"
+        required: false
+        type: string
+
+jobs:
+  deploy_app:
+    name: Deploy app to Netlify
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Download web-app artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name-files }}
+          path: .vercel/output/static
+      - name: Download web-functions artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name-function }}
+          path: .vercel/output/functions
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: create .vercel/output/config.json
+        run: |
+          mkdir -p .vercel
+          echo '{
+            "version": 3,
+            "crons": []
+          }' > .vercel/output/config.json 
+
+      - name: Deploy to Vercel
+        run: vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_PAT }}
+        env:
+          VERCEL_ORG_ID: ${{vars.VERCEL_ORGID}}
+          VERCEL_PROJECT_ID: ${{vars.VERCEL_PROJECTID}}

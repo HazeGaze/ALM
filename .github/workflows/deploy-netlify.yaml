@@ -7,7 +7,7 @@ on:
         type: string
         description: github environment to deploy to
         required: true
-      artifact-name:
+      artifact-name-files:
         description: "The name of the artifact to download"
         required: true
         type: string
