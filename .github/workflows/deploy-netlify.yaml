@@ -38,22 +38,31 @@ jobs:
           echo "Deploying to environment: ${{ inputs.environment }}"
           echo "Deploying to artifact: ${{ secrets.NETLIFY_PAT }}"
           echo "Deploying to artifact: ${{ vars.NETLIFY_PROJECTID }}"
-      - name: Deploy to Netlify
-        uses: South-Paw/action-netlify-cli@v2
-        id: netlify
+
+      - name: Publish
+        uses: netlify/actions/cli@master
         with:
-          # note that the --json flag has been passed so we can parse outputs
           args: deploy --json --prod --dir "./dist" --functions "./functions" --message "Deploy from GitHub Actions [${{ github.sha }}]"
         env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PAT }}
           NETLIFY_SITE_ID: ${{ vars.NETLIFY_PROJECTID }}
-      - name: Parse NETLIFY_OUTPUT JSON
-        run: |
-          echo "The URL where the logs from the deploy can be found"
-          echo "${{ fromJson(steps.netlify.outputs.NETLIFY_OUTPUT).logs }}"
-          echo ""
-          echo "the URL of the draft site that Netlify provides"
-          echo "${{ fromJson(steps.netlify.outputs.NETLIFY_OUTPUT).deploy_url }}"
-          echo ""
-          echo "the URL of the "real" site, set only if `--prod` was passed"
-          echo "${{ fromJson(steps.netlify.outputs.NETLIFY_OUTPUT).url }}"
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+
+      # - name: Deploy to Netlify
+      #   uses: South-Paw/action-netlify-cli@v2
+      #   id: netlify
+      #   with:
+      #     # note that the --json flag has been passed so we can parse outputs
+      #     args: deploy --json --prod --dir "./dist" --functions "./functions" --message "Deploy from GitHub Actions [${{ github.sha }}]"
+      #   env:
+      #     NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PAT }}
+      #     NETLIFY_SITE_ID: ${{ vars.NETLIFY_PROJECTID }}
+      # - name: Parse NETLIFY_OUTPUT JSON
+      #   run: |
+      #     echo "The URL where the logs from the deploy can be found"
+      #     echo "${{ fromJson(steps.netlify.outputs.NETLIFY_OUTPUT).logs }}"
+      #     echo ""
+      #     echo "the URL of the draft site that Netlify provides"
+      #     echo "${{ fromJson(steps.netlify.outputs.NETLIFY_OUTPUT).deploy_url }}"
+      #     echo ""
+      #     echo "the URL of the "real" site, set only if `--prod` was passed"
+      #     echo "${{ fromJson(steps.netlify.outputs.NETLIFY_OUTPUT).url }}"
