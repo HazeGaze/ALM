@@ -46,7 +46,13 @@ jobs:
         run: yarn install --immutable
 
       - name: Build web-app
-        working-directory: ${{ inputs.app-folder }}
+        uses: netlify/actions/build@master
+        env:
+          NETLIFY_SITE_ID: ${{ vars.NETLIFY_PROJECTID }}
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_DIR: ${{ inputs.dist-folder }}
+
+      - name: Build web-app
         run: yarn build
 
       - name: Upload web-app artifact
