@@ -11,6 +11,10 @@ on:
         description: "The name of the artifact to download"
         required: true
         type: string
+      artifact-name-functions:
+        description: "The name of the artifact to download"
+        required: false
+        type: string
 
 jobs:
   deploy_app:
@@ -21,8 +25,14 @@ jobs:
       - name: Download web-app artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.artifact-name }}
+          name: ${{ inputs.artifact-name-files }}
           path: dist
+      - name: Download functions artifact
+        if: ${{ inputs.artifact-name-functions != '' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.artifact-name-functions }}
+          path: functions
       - name: echo environment
         run: |
           echo "Deploying to environment: ${{ inputs.environment }}"
@@ -33,7 +43,7 @@ jobs:
         id: netlify
         with:
           # note that the --json flag has been passed so we can parse outputs
-          args: deploy --json --prod --dir "./dist" --message "Deploy from GitHub Actions [${{ github.sha }}]"
+          args: deploy --json --prod --dir "./dist" --functions "./functions" --message "Deploy from GitHub Actions [${{ github.sha }}]"
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_PAT }}
           NETLIFY_SITE_ID: ${{ vars.NETLIFY_PROJECTID }}
