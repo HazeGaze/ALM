@@ -15,6 +15,10 @@ on:
         description: "The path of the app to deploy"
         required: true
         type: string
+      dist-folder:
+        description: "The path of the dist folder, relative to the app folder"
+        required: true
+        type: string
 
 jobs:
   deploy_app:
@@ -27,7 +31,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ inputs.artifact-name }}
-          path: ${{ format('{0}/dist', inputs.app-folder) }}
+          path: ${{ format('{0}/{1}', inputs.app-folder, inputs.dist-folder) }}
 
       - name: Deploy to Vercel
         working-directory: ${{ inputs.app-folder }}
