@@ -7,13 +7,13 @@ on:
         type: string
         description: github environment to deploy to
         required: true
-      artifact-name-files:
+      artifact-name:
         description: "The name of the artifact, which contains the static files to deploy"
         required: true
         type: string
-      artifact-name-function:
-        description: "The name of the artifact, which contains the serverless functions"
-        required: false
+      app-folder:
+        description: "The path of the app to deploy"
+        required: true
         type: string
 
 jobs:
@@ -22,30 +22,16 @@ jobs:
     runs-on: ubuntu-latest
     environment: ${{ inputs.environment }}
     steps:
+      - uses: actions/checkout@v4
       - name: Download web-app artifact
         uses: actions/download-artifact@v4
         with:
-          name: ${{ inputs.artifact-name-files }}
-          path: .vercel/output/static
-      - name: Download web-functions artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ${{ inputs.artifact-name-function }}
-          path: .vercel/output/functions
-
-      - name: Install Vercel CLI
-        run: npm install --global vercel@latest
-
-      - name: create .vercel/output/config.json
-        run: |
-          mkdir -p .vercel
-          echo '{
-            "version": 3,
-            "crons": []
-          }' > .vercel/output/config.json 
+          name: "feed-it-later-artifact"
+          path: ${{ format('{0}/dist', inputs.app-folder) }}
 
       - name: Deploy to Vercel
-        run: vercel deploy --prebuilt --prod --yes --token=${{ secrets.VERCEL_PAT }}
+        working-directory: ${{ inputs.app-folder }}
+        run: npx vercel deploy --prod --token ${{ secrets.VERCEL_TOKEN }} --yes
         env:
-          VERCEL_ORG_ID: ${{vars.VERCEL_ORGID}}
-          VERCEL_PROJECT_ID: ${{vars.VERCEL_PROJECTID}}
+          VERCEL_ORG_ID: ${{secrets.VERCEL_ORGID}}
+          VERCEL_PROJECT_ID: ${{secrets.VERCEL_PROJECTID}}
