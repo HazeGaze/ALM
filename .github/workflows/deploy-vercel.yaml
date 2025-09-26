@@ -26,7 +26,7 @@ jobs:
       - name: Download web-app artifact
         uses: actions/download-artifact@v4
         with:
-          name: "feed-it-later-artifact"
+          name: ${{ inputs.artifact-name }}
           path: ${{ format('{0}/dist', inputs.app-folder) }}
 
       - name: Deploy to Vercel
